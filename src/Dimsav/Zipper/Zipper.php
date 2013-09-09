@@ -1,5 +1,4 @@
 <?php namespace Dimsav;
-use Dimsav\Exception\RuntimeException;
 
 /**
  * Author: http://twitter.com/dimsav
@@ -14,12 +13,14 @@ class Zipper
     private $files = array();
     private $excludes = array();
     private $destinationFile;
+    private $destinationFileName;
 
     private $destinationDirectory;
 
     public function add($file)
     {
-        $this->files[] = $file;
+        $this->validatePath($file);
+        $this->files[] = realpath($file);
     }
 
     public function getFiles()
@@ -29,7 +30,8 @@ class Zipper
 
     public function addExclude($exclude)
     {
-        $this->excludes[] = $exclude;
+        $this->validatePath($exclude);
+        $this->excludes[] = realpath($exclude);
     }
 
     public function getExcludes()
@@ -37,22 +39,38 @@ class Zipper
         return $this->excludes;
     }
 
-    public function compressAs($destinationFile)
+    public function setDestination($destinationFile)
     {
-        $this->determineDestination($destinationFile);
+        if ( ! $this->isValidPath(dirname($destinationFile)))
+        {
+            mkdir(dirname($destinationFile), 0777, true);
+        }
+        $this->validatePath(dirname($destinationFile));
 
+        $this->destinationDirectory = realpath(dirname($destinationFile));
+        $this->destinationFileName = basename($destinationFile);
+        $this->destinationFile = "$this->destinationDirectory/$this->destinationFileName";
+    }
+
+    public function compress()
+    {
         $excludesOption = $this->getExcludeCommandOption();
-//var_dump($this->destinationDirectory); die;
-        $this->chdir($this->destinationDirectory);
-        var_dump("zip $excludesOption -r "); die;
-        exec("zip $excludesOption -r ");
+        $addedFiles = $this->getAddedFilesOption();
+
+        $this->forceCd($this->destinationDirectory);
+        $command = "zip $excludesOption -r $this->destinationFileName $addedFiles";
+        exec($command);
 
     }
 
-    private function determineDestination($destinationFile)
+    private function getAddedFilesOption()
     {
-        $this->destinationFile = $destinationFile;
-        $this->destinationDirectory = dirname($destinationFile);
+        $output = '';
+        foreach ($this->files as $file)
+        {
+            $output .= ' '.$this->getRelatedToPath($this->destinationDirectory, $file).' ';
+        }
+        return $output;
     }
 
     private function getExcludeCommandOption()
@@ -66,7 +84,7 @@ class Zipper
             $output .= ' '.$this->getExcludeCommandOptionSegment($exclude).' ';
         }
 
-        return $output;
+        return trim($output);
     }
 
     private function getExcludeCommandOptionSegment($exclude)
@@ -75,7 +93,7 @@ class Zipper
 
         if ($this->isValidPath($exclude) && $this->isPathInsideFilesArray($exclude) )
         {
-            $segment = $this->getExcludeForZipOption($exclude);
+            $segment = $this->getRelatedToPath($this->destinationDirectory, $exclude);
 
             if (is_dir($exclude))
             {
@@ -103,11 +121,50 @@ class Zipper
         return false;
     }
 
-    private function getExcludeForZipOption($path)
+    private function getRelatedToPath($base, $path)
     {
-        $pathDirectory = "$this->destinationDirectory/";
+        $this->validatePath($base);
+        $this->validatePath($path);
+        $base = trim(realpath($base),'\\/');
+        $path = trim(realpath($path),'\\/');
 
-        return substr($path, strlen($pathDirectory));
+        $output = '';
+        $baseArray = preg_split('%[\\/]%', $base);
+
+        $pathArray = preg_split('%[\\/]%', $path);
+
+        $commonDepth = -1;
+        $outsideDepth = 0;
+
+        foreach ($baseArray as $key => $node)
+        {
+
+            if ( ! isset($pathArray[$key]))
+            {
+                $output .= '../';
+                $outsideDepth++;
+            }
+            elseif ($node != $pathArray[$key])
+            {
+                $output .= '../';
+                $commonDepth = $key;
+                break;
+            }
+            else
+            {
+                $commonDepth = $key+1;
+            }
+        }
+
+        if ($commonDepth >= 0)
+        {
+            for ($i = $commonDepth; $i < count($pathArray); $i++)
+            {
+                $output.=$pathArray[$i].'/';
+            }
+        }
+
+        return rtrim($output,'/');
     }
 
     private function makeExcludeSegmentRecursive($excludePath)
@@ -120,13 +177,18 @@ class Zipper
         return substr($string, -1, 1) == '/';
     }
 
-    private function chdir($directory)
+    private function forceCd($directory)
     {
         if ( ! $this->isValidPath($directory))
         {
             mkdir($directory, 0777, true);
         }
         chdir($directory);
+    }
+
+    private function validatePath($path)
+    {
+        if ( ! $this->isValidPath($path)) throw new \InvalidArgumentException($path);
     }
 
 
