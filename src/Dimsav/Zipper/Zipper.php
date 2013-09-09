@@ -68,7 +68,7 @@ class Zipper
         $output = '';
         foreach ($this->files as $file)
         {
-            $output .= ' '.$this->getRelatedToPath($this->destinationDirectory, $file).' ';
+            $output .= ' '.$this->absoluteToRelativePath($this->destinationDirectory, $file).' ';
         }
         return $output;
     }
@@ -93,7 +93,7 @@ class Zipper
 
         if ($this->isValidPath($exclude) && $this->isPathInsideFilesArray($exclude) )
         {
-            $segment = $this->getRelatedToPath($this->destinationDirectory, $exclude);
+            $segment = $this->absoluteToRelativePath($this->destinationDirectory, $exclude);
 
             if (is_dir($exclude))
             {
@@ -121,50 +121,57 @@ class Zipper
         return false;
     }
 
-    private function getRelatedToPath($base, $path)
+    private function absoluteToRelativePath($fromPath, $toPath)
     {
-        $this->validatePath($base);
-        $this->validatePath($path);
-        $base = trim(realpath($base),'\\/');
-        $path = trim(realpath($path),'\\/');
+        $this->validatePath($fromPath);
+        $this->validatePath($toPath);
+        $fromPath = trim(realpath($fromPath),'\\/');
+        $toPath = trim(realpath($toPath),'\\/');
 
-        $output = '';
-        $baseArray = preg_split('%[\\/]%', $base);
+        $fromPathArray = preg_split('%[\\/]%', $fromPath);
+        $toPathArray = preg_split('%[\\/]%', $toPath);
 
-        $pathArray = preg_split('%[\\/]%', $path);
+        $commonPartsCount = 0;
 
-        $commonDepth = -1;
-        $outsideDepth = 0;
-
-        foreach ($baseArray as $key => $node)
-        {
-
-            if ( ! isset($pathArray[$key]))
+        for ($i = 0; $i < max(sizeof($fromPathArray), sizeof($toPathArray)); ++$i) {
+            if (isset($fromPathArray[$i]) && isset($toPathArray[$i]))
             {
-                $output .= '../';
-                $outsideDepth++;
-            }
-            elseif ($node != $pathArray[$key])
-            {
-                $output .= '../';
-                $commonDepth = $key;
-                break;
+                if ($fromPathArray[$i] == $toPathArray[$i])
+                {
+                    $commonPartsCount ++;
+                }
+                else
+                {
+                    break;
+                }
             }
             else
             {
-                $commonDepth = $key+1;
+                break;
             }
+
         }
 
-        if ($commonDepth >= 0)
-        {
-            for ($i = $commonDepth; $i < count($pathArray); $i++)
-            {
-                $output.=$pathArray[$i].'/';
-            }
+        $relativeParts = array();
+
+        /* Replacing each part of the fromPath remaining after the common directories with ..
+         * to go to the common root of the two paths
+         */
+        if (sizeof($fromPathArray) > $commonPartsCount) {
+            $replacementCount  = sizeof($fromPathArray) - $commonPartsCount;
+            $relativeParts     = array_fill(0, $replacementCount, '..');
         }
 
-        return rtrim($output,'/');
+        /*
+         * Each part of the "to path" that remains after the common parts is merely
+         * appended to the relative path.
+         */
+        if (sizeof($toPathArray) > $commonPartsCount) {
+            $remainingToPathParts  = array_slice($toPathArray, $commonPartsCount);
+            $relativeParts           = array_merge($relativeParts, $remainingToPathParts);
+        }
+
+        return implode('/', $relativeParts);
     }
 
     private function makeExcludeSegmentRecursive($excludePath)
@@ -190,6 +197,4 @@ class Zipper
     {
         if ( ! $this->isValidPath($path)) throw new \InvalidArgumentException($path);
     }
-
-
 }

@@ -5,6 +5,7 @@ use Dimsav\Zipper;
 class ZipperTest extends PHPUnit_Framework_TestCase {
 
     private $destinationFile = '';
+    /** @var  Zipper */
     private $zipper;
 
     public function setUp()
@@ -53,9 +54,17 @@ class ZipperTest extends PHPUnit_Framework_TestCase {
         $this->assertFileExists(__DIR__.'/../../temp/test.zip');
     }
 
+    public function testZipParentDirectory()
+    {
+        $this->zipper->add(__DIR__.'/../../..');
+        $this->zipper->setDestination($this->destinationFile);
+        $this->zipper->compress();
+        $this->assertFileExists($this->destinationFile);
+    }
+
     public function testZipHigherDirectory()
     {
-        $this->zipper->add(__DIR__.'/../../../../unix-zipper');
+        $this->zipper->add(__DIR__.'/../../../src');
         $this->zipper->setDestination($this->destinationFile);
         $this->zipper->compress();
         $this->assertFileExists($this->destinationFile);
