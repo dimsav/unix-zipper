@@ -105,4 +105,9 @@ class ZipperTest extends PHPUnit_Framework_TestCase {
         }
     }
 
+    public function tearDown()
+    {
+        if (is_dir($this->extractDir)) exec('rm -rf '.realpath($this->extractDir));
+    }
+
 }
