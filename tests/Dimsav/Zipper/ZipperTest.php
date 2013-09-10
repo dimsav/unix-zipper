@@ -71,11 +71,17 @@ class ZipperTest extends PHPUnit_Framework_TestCase {
 
     public function testZipParentDirectoryWithPassword()
     {
-        $this->zipper->add(__DIR__.'/../../..');
+        $password = 'test';
+        $this->zipper->add(__DIR__.'/../../samples');
         $this->zipper->setDestination($this->destinationFile);
-        $this->zipper->setPassword('test');
+        $this->zipper->setPassword($password);
         $this->zipper->compress();
         $this->assertFileExists($this->destinationFile);
+
+        exec("unzip -P $password $this->destinationFile");
+
+        $this->assertFileExists($this->extractDir.'/samples/files/sample.png');
+        $this->assertFileExists($this->extractDir.'/samples/files/logs/log.txt');
     }
 
     public function testZipHigherDirectory()
