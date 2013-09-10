@@ -14,6 +14,7 @@ class Zipper
     private $excludes = array();
     private $destinationFile;
     private $destinationFileName;
+    private $password;
 
     private $destinationDirectory;
 
@@ -55,12 +56,23 @@ class Zipper
     public function compress()
     {
         $excludesOption = $this->getExcludeCommandOption();
+        $passwordOption = $this->getPasswordOption();
         $addedFiles = $this->getAddedFilesOption();
 
         $this->forceCd($this->destinationDirectory);
-        $command = "zip $excludesOption -r $this->destinationFileName $addedFiles";
+        $command = "zip $passwordOption $excludesOption -r $this->destinationFileName $addedFiles";
         exec($command);
 
+    }
+
+    public function setPassword($password)
+    {
+        $this->password = $password;
+    }
+
+    private function getPasswordOption()
+    {
+        return $this->password != '' ? "-P $this->password " : '';
     }
 
     private function getAddedFilesOption()

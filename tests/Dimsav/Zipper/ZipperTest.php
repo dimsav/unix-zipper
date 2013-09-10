@@ -54,10 +54,11 @@ class ZipperTest extends PHPUnit_Framework_TestCase {
         $this->assertFileExists(__DIR__.'/../../temp/test.zip');
     }
 
-    public function testZipParentDirectory()
+    public function testZipParentDirectoryWithPassword()
     {
         $this->zipper->add(__DIR__.'/../../..');
         $this->zipper->setDestination($this->destinationFile);
+        $this->zipper->setPassword('test');
         $this->zipper->compress();
         $this->assertFileExists($this->destinationFile);
     }
