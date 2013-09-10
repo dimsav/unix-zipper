@@ -2,7 +2,7 @@
     "name": "dimsav/zipper",
     "type": "library",
     "description": "A zip compression library that uses the system's commands. It is only compatible with Unix OS at the moment.",
-    "keywords": ["zip","zipper"],
+    "keywords": ["zip","zipper","compress"],
     "homepage": "http://github.com/dimsav/zipper",
     "license": "MIT",
     "authors": [
