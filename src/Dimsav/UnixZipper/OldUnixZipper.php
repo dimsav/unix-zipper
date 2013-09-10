@@ -3,7 +3,7 @@
 use Dimsav\Exception\RuntimeException;
 
 
-class UnixZipper {
+class OldUnixZipper {
 
     // Basic parameters
     private $pathToBeZipped; // can be both file or folder

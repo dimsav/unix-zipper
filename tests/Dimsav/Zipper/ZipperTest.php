@@ -1,16 +1,16 @@
 <?php
 
-use Dimsav\Zipper;
+use Dimsav\UnixZipper;
 
 class ZipperTest extends PHPUnit_Framework_TestCase {
 
     private $destinationFile = '';
-    /** @var  Zipper */
+    /** @var  UnixZipper */
     private $zipper;
 
     public function setUp()
     {
-        $this->zipper = new Zipper();
+        $this->zipper = new UnixZipper();
         $this->destinationFile = __DIR__.'/../../temp/test.zip';
         if (file_exists($this->destinationFile)) unlink($this->destinationFile);
     }

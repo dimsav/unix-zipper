@@ -7,7 +7,7 @@
  * Note: Won't work in windows.
  *
  */
-class Zipper
+class UnixZipper
 {
 
     private $files = array();
