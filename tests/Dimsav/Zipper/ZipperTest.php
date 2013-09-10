@@ -22,7 +22,7 @@ class ZipperTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals($this->zipper->getFiles(), array(realpath($dir)));
 
         $exclude = __DIR__.'/../../samples/files/logs';
-        $this->zipper->addExclude($exclude);
+        $this->zipper->exclude($exclude);
         $this->assertEquals($this->zipper->getExcludes(), array(realpath($exclude)));
     }
 
@@ -47,7 +47,7 @@ class ZipperTest extends PHPUnit_Framework_TestCase {
     {
         $this->zipper->add(__DIR__.'/../../samples');
 
-        $this->zipper->addExclude(__DIR__.'/../../samples/files/logs/log.txt');
+        $this->zipper->exclude(__DIR__.'/../../samples/files/logs/log.txt');
         $this->zipper->setDestination(__DIR__.'/../../temp/test.zip');
 
         $this->zipper->compress();

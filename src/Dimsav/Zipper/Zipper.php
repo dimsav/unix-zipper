@@ -29,7 +29,7 @@ class Zipper
         return $this->files;
     }
 
-    public function addExclude($exclude)
+    public function exclude($exclude)
     {
         $this->validatePath($exclude);
         $this->excludes[] = realpath($exclude);
