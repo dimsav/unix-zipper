@@ -72,7 +72,7 @@ class UnixZipper
 
     private function getPasswordOption()
     {
-        return $this->password != '' ? "-P $this->password " : '';
+        return $this->password != '' ? "-P " .escapeshellarg($this->password) : '';
     }
 
     private function getAddedFilesOption()
