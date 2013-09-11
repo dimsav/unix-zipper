@@ -1,12 +1,16 @@
 # UnixZipper
 
-A simple compression package for Unix operating systems.
+A simple zip compression library for Unix operating systems.
 UnixZipper is ideal for creating backups of your projects in unix servers.
 
+## Features
+1. Easy to use
+2. Password protection
+2. Tested for stability
 
 ## Who does it work
 
-Here is a simple example but you can check the tests to see the class in action.
+Here is a simple example. Feel free to check the tests to see the class in action.
 
 ```php
 // Instantiate the class
@@ -33,7 +37,7 @@ $zipper->compress();
 
 ## Why unix
 
-The reason I chose to make this package unix only is because I wanted to rely
+The reason I chose to make this package unix-only is because I wanted to rely
 on the system's zip function, that offers stability and flexibility. It also
 offers the possibility to exclude directories recursively, a feature I couldn't
 find in other php classes.
