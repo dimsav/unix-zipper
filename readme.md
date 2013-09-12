@@ -8,7 +8,7 @@ UnixZipper is ideal for creating backups of your projects in unix servers.
 2. Password protection
 2. Tested for stability
 
-## Who does it work
+## How does it work
 
 Here is a simple example. Feel free to check the tests to see the class in action.
 
