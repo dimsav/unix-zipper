@@ -67,6 +67,20 @@ class ZipperTest extends PHPUnit_Framework_TestCase {
         $this->assertFileNotExists($this->extractDir.'/samples/files/logs/log.txt');
     }
 
+    public function testExcludeDirectoryRecursive()
+    {
+        $this->zipper->add(__DIR__.'/../../samples');
+
+        $this->zipper->exclude(__DIR__.'/../../samples/files');
+        $this->zipper->setDestination(__DIR__.'/../../temp/test.zip');
+        $this->zipper->compress();
+        $this->assertFileExists(__DIR__.'/../../temp/test.zip');
+
+        $this->extract();
+        $this->assertFileNotExists($this->extractDir.'/samples/files/sample.png');
+        $this->assertFileNotExists($this->extractDir.'/samples/files/logs/log.txt');
+    }
+
     public function testZipParentDirectoryWithPassword()
     {
         $password = 'test;zip test\'';
