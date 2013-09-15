@@ -14,8 +14,6 @@ class ZipperTest extends PHPUnit_Framework_TestCase {
         $this->zipper          = new UnixZipper();
         $this->extractDir      = __DIR__.'/../../temp';
         $this->destinationFile = __DIR__.'/../../temp/test.zip';
-
-        if (is_dir($this->extractDir)) exec('rm -rf '.realpath($this->extractDir));
     }
 
     public function testSettingArguments()
@@ -94,6 +92,21 @@ class ZipperTest extends PHPUnit_Framework_TestCase {
 
         $this->extract();
         $this->assertFileExists($this->extractDir.'/src/Dimsav/UnixZipper.php');
+    }
+
+    public function testZipSameDirectory()
+    {
+        $this->zipper->add(__DIR__.'/../../../src');
+        $this->zipper->setDestination($this->destinationFile);
+        $this->zipper->compress();
+        $this->assertFileExists($this->destinationFile);
+
+        $this->setUp();
+
+        $this->zipper->add(__DIR__.'/../../temp');
+        $this->zipper->setDestination(__DIR__.'/../../temp/test2.zip');
+        $this->zipper->compress();
+        $this->assertFileExists(__DIR__.'/../../temp/test2.zip');
     }
 
     private function extract()
