@@ -183,7 +183,7 @@ class UnixZipper
             $relativeParts           = array_merge($relativeParts, $remainingToPathParts);
         }
 
-        return implode('/', $relativeParts);
+        return $relativeParts ? implode('/', $relativeParts) : './';
     }
 
     private function makeExcludeSegmentRecursive($excludePath)
