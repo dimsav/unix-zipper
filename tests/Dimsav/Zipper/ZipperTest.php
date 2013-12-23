@@ -52,7 +52,7 @@ class ZipperTest extends PHPUnit_Framework_TestCase {
         $this->extract();
         $this->assertFileExists($this->extractDir.'/samples/files/logs/log.txt');
         $this->assertFileExists($this->extractDir.'/samples/files/sample.png');
-        $this->assertFileExists($this->extractDir.'/src/Dimsav/UnixZipper/UnixZipper.php');
+        $this->assertFileExists($this->extractDir.'/src/Dimsav/UnixZipper.php');
     }
 
     public function testExcludeFile()
@@ -93,7 +93,7 @@ class ZipperTest extends PHPUnit_Framework_TestCase {
         $this->assertFileExists($this->destinationFile);
 
         $this->extract();
-        $this->assertFileExists($this->extractDir.'/src/Dimsav/UnixZipper/UnixZipper.php');
+        $this->assertFileExists($this->extractDir.'/src/Dimsav/UnixZipper.php');
     }
 
     private function extract()
