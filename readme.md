@@ -37,7 +37,7 @@ $zipper->setDestination('/file/after/compression/test.zip');
 $zipper->compress();
 ```
 
-Since version 1.1, you can set a base path, and provide the files to be compressed relatively.
+Since version 1.2, you can set a base path, and provide the files to be compressed relatively.
 
 ```php
 $zipper = new UnixZipper();
@@ -65,24 +65,13 @@ find in other php classes.
 
 ## Installation
 
-Even though you can just download and include the UnixZipper class, I would
-recommend you to use composer, as it makes the update process much easier.
+Install using composer:
 
-### Simple install
-
-```php
-// Installing by including the UnixZipper class
-require_once('dir/to/UnixZipper.php');
-```
-
-### Install with composer on a new project
-
-1. Install composer and add it to your system's path.
-2. Clone the UnixZipper repository
-3. Run `composer install` to the root directory
-4. Include the `vendor/autoload.php` to your project.
-
+1. Add `"dimsav/unix-zipper": "1.*"` to your composer.json file
+2. Run `composer update`
 
 ## Dependencies
 
-There are no dependencies on other packages or classes.
+The only requirements are: 
+* executing the code on a unix system 
+* composer for installing/autoloading
