@@ -16,7 +16,7 @@ Here is a simple example. Feel free to check the tests to see the class in actio
 // Instantiate the class
 $zipper = new UnixZipper();
 
-// Add directories and files for compression
+// Add absolute paths of directories or files for compression
 $zipper->add('/absolute/path/to/some/directory');
 $zipper->add('/absolute/path/to/file.txt');
 
@@ -32,6 +32,24 @@ $zipper->setPassword('my_password');
 $zipper->setDestination('/file/after/compression/test.zip');
 
 // Do the magic
+$zipper->compress();
+```
+
+Since version 1.1, you can set a base path, and provide the files to be compressed relatively.
+
+```php
+$zipper = new UnixZipper();
+
+// Set base path
+$zipper->setAbsolutePathAsBase('/absolute/projects');
+
+// Add relative paths of directories or files for compression
+$zipper->add('project-1');     // /absolute/projects/project-1
+$zipper->add('logs/file.txt'); // /absolute/projects/logs/file.txt
+
+$zipper->setDestination('/file/after/compression/test.zip');
+
+// Compress
 $zipper->compress();
 ```
 

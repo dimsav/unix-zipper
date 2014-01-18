@@ -18,10 +18,22 @@ class UnixZipper
 
     private $destinationDirectory;
 
+    /**
+     * @var PathHelper
+     */
+    private $pathHelper;
+
+    public function __construct()
+    {
+        $this->pathHelper = new PathHelper();
+    }
+
     public function add($file)
     {
-        $this->validatePath($file);
+        $this->pathHelper->chdirToBase();
+        $this->pathHelper->validatePath($file);
         $this->files[] = realpath($file);
+        $this->pathHelper->chdirBack();
     }
 
     public function getFiles()
@@ -31,8 +43,10 @@ class UnixZipper
 
     public function exclude($exclude)
     {
-        $this->validatePath($exclude);
+        $this->pathHelper->chdirToBase();
+        $this->pathHelper->validatePath($exclude);
         $this->excludes[] = realpath($exclude);
+        $this->pathHelper->chdirBack();
     }
 
     public function getExcludes()
@@ -42,11 +56,11 @@ class UnixZipper
 
     public function setDestination($destinationFile)
     {
-        if ( ! $this->isValidPath(dirname($destinationFile)))
+        if ( ! $this->pathHelper->isValid(dirname($destinationFile)))
         {
             mkdir(dirname($destinationFile), 0777, true);
         }
-        $this->validatePath(dirname($destinationFile));
+        $this->pathHelper->validatePath(dirname($destinationFile));
 
         $this->destinationDirectory = realpath(dirname($destinationFile));
         $this->destinationFileName = basename($destinationFile);
@@ -70,6 +84,16 @@ class UnixZipper
         $this->password = $password;
     }
 
+    public function setAbsolutePathAsBase($base)
+    {
+        $this->pathHelper->setBase($base);
+    }
+
+    public function setRelativePathAsBase($base, $root = null)
+    {
+        $this->pathHelper->setBase($base, $root);
+    }
+
     private function getPasswordOption()
     {
         return $this->password != '' ? "-P " .escapeshellarg($this->password) : '';
@@ -80,7 +104,7 @@ class UnixZipper
         $output = '';
         foreach ($this->files as $file)
         {
-            $output .= ' '.$this->absoluteToRelativePath($this->destinationDirectory, $file).' ';
+            $output .= ' '.$this->pathHelper->absoluteToRelativePath($this->destinationDirectory, $file).' ';
         }
         return $output;
     }
@@ -103,9 +127,9 @@ class UnixZipper
     {
         $segment = '';
 
-        if ($this->isValidPath($exclude) && $this->isPathInsideFilesArray($exclude) )
+        if ($this->pathHelper->isValid($exclude) && $this->isPathInsideFilesArray($exclude) )
         {
-            $segment = $this->absoluteToRelativePath($this->destinationDirectory, $exclude);
+            $segment = $this->pathHelper->absoluteToRelativePath($this->destinationDirectory, $exclude);
 
             if (is_dir($exclude))
             {
@@ -118,11 +142,6 @@ class UnixZipper
         return $segment;
     }
 
-    private function isValidPath($path)
-    {
-        return is_dir($path) || is_file($path);
-    }
-
     private function isPathInsideFilesArray($path)
     {
         foreach ($this->files as $file)
@@ -131,59 +150,6 @@ class UnixZipper
                 return true;
         }
         return false;
-    }
-
-    private function absoluteToRelativePath($fromPath, $toPath)
-    {
-        $this->validatePath($fromPath);
-        $this->validatePath($toPath);
-        $fromPath = trim(realpath($fromPath),'\\/');
-        $toPath = trim(realpath($toPath),'\\/');
-
-        $fromPathArray = preg_split('%[\\/]%', $fromPath);
-        $toPathArray = preg_split('%[\\/]%', $toPath);
-
-        $commonPartsCount = 0;
-
-        for ($i = 0; $i < max(sizeof($fromPathArray), sizeof($toPathArray)); ++$i) {
-            if (isset($fromPathArray[$i]) && isset($toPathArray[$i]))
-            {
-                if ($fromPathArray[$i] == $toPathArray[$i])
-                {
-                    $commonPartsCount ++;
-                }
-                else
-                {
-                    break;
-                }
-            }
-            else
-            {
-                break;
-            }
-
-        }
-
-        $relativeParts = array();
-
-        /* Replacing each part of the fromPath remaining after the common directories with ..
-         * to go to the common root of the two paths
-         */
-        if (sizeof($fromPathArray) > $commonPartsCount) {
-            $replacementCount  = sizeof($fromPathArray) - $commonPartsCount;
-            $relativeParts     = array_fill(0, $replacementCount, '..');
-        }
-
-        /*
-         * Each part of the "to path" that remains after the common parts is merely
-         * appended to the relative path.
-         */
-        if (sizeof($toPathArray) > $commonPartsCount) {
-            $remainingToPathParts  = array_slice($toPathArray, $commonPartsCount);
-            $relativeParts           = array_merge($relativeParts, $remainingToPathParts);
-        }
-
-        return implode('/', $relativeParts);
     }
 
     private function makeExcludeSegmentRecursive($excludePath)
@@ -198,15 +164,10 @@ class UnixZipper
 
     private function forceCd($directory)
     {
-        if ( ! $this->isValidPath($directory))
+        if ( ! $this->pathHelper->isValid($directory))
         {
             mkdir($directory, 0777, true);
         }
         chdir($directory);
-    }
-
-    private function validatePath($path)
-    {
-        if ( ! $this->isValidPath($path)) throw new \InvalidArgumentException($path);
     }
 }
