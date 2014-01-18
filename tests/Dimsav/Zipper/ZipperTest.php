@@ -8,12 +8,14 @@ class ZipperTest extends PHPUnit_Framework_TestCase {
     private $extractDir;
     /** @var  UnixZipper */
     private $zipper;
+    private $originalCwd;
 
     public function setUp()
     {
         $this->zipper          = new UnixZipper();
         $this->extractDir      = __DIR__.'/../../temp';
         $this->destinationFile = __DIR__.'/../../temp/test.zip';
+        $this->originalCwd = getcwd();
 
         if (is_dir($this->extractDir)) exec('rm -rf '.realpath($this->extractDir));
     }
@@ -96,6 +98,36 @@ class ZipperTest extends PHPUnit_Framework_TestCase {
         $this->assertFileExists($this->extractDir.'/src/Dimsav/UnixZipper.php');
     }
 
+    public function testSetAnAbsolutePathAsRootPath()
+    {
+        $dir = __DIR__.'/../../../tests';
+        $this->zipper->setAbsolutePathAsBase($dir);
+
+        $this->zipper->add('samples');
+        $this->assertEquals($this->zipper->getFiles(), array(realpath($dir . '/samples')));
+    }
+
+    public function testSetARelativePathAsRootPath()
+    {
+        $dir = 'tests';
+        $relativeTo = realpath(__DIR__.'/../../../');
+        $this->zipper->setRelativePathAsBase($dir, $relativeTo);
+
+        $this->zipper->add('samples');
+        $this->assertEquals($this->zipper->getFiles(), array($relativeTo . "/$dir/samples"));
+    }
+
+    public function testCwdIsNotChangedAfterSettingRelativeBase()
+    {
+        $cwd = getcwd();
+        $dir = 'tests';
+        $relativeTo = realpath(__DIR__.'/../../../');
+        $this->zipper->setRelativePathAsBase($dir, $relativeTo);
+
+        $this->zipper->add('samples');
+        $this->assertEquals($cwd, getcwd());
+    }
+
     private function extract()
     {
         $zip = new ZipArchive;
@@ -107,6 +139,7 @@ class ZipperTest extends PHPUnit_Framework_TestCase {
 
     public function tearDown()
     {
+        chdir($this->originalCwd);
         if (is_dir($this->extractDir)) exec('rm -rf '.realpath($this->extractDir));
     }
 
