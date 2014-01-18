@@ -1,5 +1,7 @@
 # UnixZipper
 
+[![Latest Stable Version](https://poser.pugx.org/dimsav/unix-zipper/v/stable.png)](https://packagist.org/packages/dimsav/unix-zipper) [![Build Status](https://travis-ci.org/laravel/framework.png)](https://travis-ci.org/dimsav/unix-zipper)
+
 A simple zip compression library for Unix operating systems.
 UnixZipper is ideal for creating backups of your projects in unix servers.
 
